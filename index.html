@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>2048 Game</title>
+
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+
+	<div class="container">
+	    <div class="heading">
+	      <h1 class="title">2048</h1>
+	      <div class="scores-container">
+	        <div class="score-container">0</div>
+	        <div class="best-container">0</div>
+	      </div>
+	    </div>
+
+	    <div class="above-game">
+	      <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
+	      <a class="restart-button">New Game</a>
+	    </div>
+
+	    <div class="game-container">
+	      <div class="game-message">
+	        <p></p>
+	        <div class="lower">
+		        <a class="keep-playing-button">Keep going</a>
+	          <a class="retry-button">Try again</a>
+	        </div>
+	      </div>
+
+	      <div class="grid-container">
+	        <div class="grid-row">
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	        </div>
+	        <div class="grid-row">
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	        </div>
+	        <div class="grid-row">
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	        </div>
+	        <div class="grid-row">
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	          <div class="grid-cell"></div>
+	        </div>
+	      </div>
+		  <!-- <div> -->
+	      <div class="tile-container" id="tile-container"> 
+				<div v-repeat="tiles" class="tile tile-{{value}} tile-position-{{x}}-{{y}} tile-new"
+				 v-on="click: reorder">
+					<div class="tile-inner">{{value}}</div>
+				</div>
+	      </div>
+	      <!-- </div> -->
+	    </div>
+
+	  </div>
+	
+
+
+
+	<script src="js/libs/vue.js"></script>
+	<script src="js/keys.js"></script>
+	<script src="js/store.js"></script>
+	<script src="js/main.js"></script>
+	<script src="//localhost:35729/livereload.js"></script>
+</body>
+</html>
