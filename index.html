@@ -59,7 +59,7 @@
 	      </div>
 		  <!-- <div> -->
 	      <div class="tile-container" id="tile-container"> 
-				<div v-repeat="tiles" class="tile tile-{{value}} tile-position-{{x}}-{{y}} tile-new"
+				<div v-repeat="tiles" class="tile tile-{{value}} tile-position-{{x+1}}-{{y+1}} tile-new"
 				 v-on="click: reorder">
 					<div class="tile-inner">{{value}}</div>
 				</div>
