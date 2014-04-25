@@ -1,63 +1,14 @@
-var data = [{
-    x: 0,
-    y: 0,
-    value: 4
-}, {
-    x: 0,
-    y: 1,
-    value: 4
-}, {
-    x: 0,
-    y: 2,
-    value: 4
-}, {
-    x: 0,
-    y: 3,
-    value: 4
-}, {
-    x: 2,
-    y: 2,
-    value: 16
-}, {
-    x: 3,
-    y: 3,
-    value: 32
-}];
-
-
-// bootstrap the demo
 var Game = new Vue({
     el: '#tile-container',
     data: {
         size: 4,
-        initItems: 2,
-        tiles: gameStorage.fetch()
+        startTiles: 2,
+        tiles: [],
+        grid: []
     },
 
     created: function() {
-        var size = this.size,
-            arr = [];
-        console.log('created');
-        this.tiles = data;
-
-        for (var x = 0; x < size; x++) {
-            arr[x] = [];
-            for (var y = 0; y < size; y++) {
-                arr[x][y] = 0;
-            }
-        }
-
-        data.forEach(function(item) {
-            arr[item.x][item.y] = 1;
-        })
-
-        this.grid = arr;
-
-        // this.positions = [];
-        //console.log(this.init());
-        // this.$watch('branch', function () {
-        //     this.fetchData()
-        // })
+        this.initArrayGrid(this.size);
     },
 
     attached: function() {
@@ -65,11 +16,17 @@ var Game = new Vue({
     },
 
     ready: function() {
-        console.log('ready');
-        // this.$watch('tiles', function (tiles) {
-        //     console.log(tiles);
-        //     // todoStorage.save(todos);
-        // });
+        var data = gameStorage.fetch();
+
+        if (data.length === 0) {
+            this.init();
+        } else {
+            this.continueGame(data);
+        }
+
+        this.$watch('tiles', function(tiles) {
+            gameStorage.save(tiles);
+        });
     },
 
     computed: {
@@ -90,15 +47,83 @@ var Game = new Vue({
     methods: {
 
         init: function() {
-            return [];
+            var startTiles = this.startTiles;
+
+            for (var i = 0; i < startTiles; i++) {
+                this.addRandomTile();
+            }
         },
 
-        reorder: function(event) {
-            this.tiles.forEach(function(item) {
-                console.log(item.value);
-                item.value++;
-            });
+        continueGame: function(data) {
+            var arr = this.grid;
+
+            this.tiles = data;
+
+            data.forEach(function(item) {
+                arr[item.x][item.y] = 1;
+            })
         },
+
+        initArrayGrid: function(size) {
+            var arr = [];
+
+            for (var x = 0; x < size; x++) {
+                arr[x] = [];
+                for (var y = 0; y < size; y++) {
+                    arr[x][y] = 0;
+                }
+            }
+
+            this.grid = arr;
+        },
+
+        addRandomTile: function() {
+            //debugger;
+
+            if (this.availableCells().length > 0) {
+                var value = Math.random() < 0.9 ? 2 : 4,
+                    randomCell = this.randomAvailableCell();
+
+
+                this.tiles.$set(this.tiles.length, {
+                    x: randomCell.x,
+                    y: randomCell.y,
+                    value: value
+                });
+
+                this.grid[randomCell.x][randomCell.y] = 1;
+
+            }
+        },
+
+        // Find the first available random position
+        randomAvailableCell: function() {
+            var cells = this.availableCells();
+
+            if (cells.length) {
+                return cells[Math.floor(Math.random() * cells.length)];
+            }
+        },
+
+        availableCells: function() {
+            var cells = [],
+                size = this.size,
+                grid = this.grid;
+
+            for (var x = 0; x < size; x++) {
+                for (var y = 0; y < size; y++) {
+                    if (!grid[x][y]) {
+                        cells.push({
+                            x: x,
+                            y: y
+                        });
+                    }
+                }
+            }
+
+            return cells;
+        },
+
         getVector: function(direction) {
             var map = {
                 0: {
@@ -140,50 +165,6 @@ var Game = new Vue({
                 farthest: previous,
                 next: cell // Used to check if a merge is required
             };
-        },
-
-        // Find the first available random position
-        randomAvailableCell: function() {
-            var cells = this.availableCells();
-
-            if (cells.length) {
-                return cells[Math.floor(Math.random() * cells.length)];
-            }
-        },
-
-        availableCells: function() {
-            var cells = [],
-                size = this.size,
-                grid = this.grid;
-
-            for (var x = 0; x < size; x++) {
-                for (var y = 0; y < size; y++) {
-                    if (!grid[x][y]) {
-                        cells.push({
-                            x: x,
-                            y: y
-                        });
-                    }
-                }
-            }
-
-            return cells;
-        },
-
-        addRandomTile: function() {
-            if (this.availableCells().length > 0) {
-                var value = Math.random() < 0.9 ? 2 : 4,
-                    randomCell = this.randomAvailableCell();
-
-                this.tiles.$set(this.tiles.length, {
-                    x: randomCell.x,
-                    y: randomCell.y,
-                    value: value
-                });
-
-                this.grid[randomCell.x][randomCell.y] = 1;
-
-            }
         },
 
         findTile: function(position) {
@@ -292,38 +273,42 @@ var Game = new Vue({
                 //this.actuate();
             }
 
-           /* GameManager.prototype.movesAvailable = function () {
-              return this.grid.cellsAvailable() || this.tileMatchesAvailable();
-            };
+        },
 
-            // Check for available matches between tiles (more expensive check)
-            GameManager.prototype.tileMatchesAvailable = function () {
-              var self = this;
+        movesAvailable: function() {
+            return this.tileMatchesAvailable();
+        },
 
-              var tile;
+        tileMatchesAvailable: function() {
+            var self = this;
+            var size = self.size;
+            var grid = self.grid;
+            var tiles = self.tiles;
+            var tile;
 
-              for (var x = 0; x < this.size; x++) {
-                for (var y = 0; y < this.size; y++) {
-                  tile = this.grid.cellContent({ x: x, y: y });
+            for (var x = 0; x < size; x++) {
+                for (var y = 0; y < size; y++) {
+                    tile = grid[x][y];
 
-                  if (tile) {
-                    for (var direction = 0; direction < 4; direction++) {
-                      var vector = self.getVector(direction);
-                      var cell   = { x: x + vector.x, y: y + vector.y };
+                    if (tile) {
+                        for (var direction = 0; direction < 4; direction++) {
+                            var vector = self.getVector(direction);
+                            var cell = {
+                                x: x + vector.x,
+                                y: y + vector.y
+                            };
 
-                      var other  = self.grid.cellContent(cell);
+                            var other = self.grid[cell.x][cell.y];
 
-                      if (other && other.value === tile.value) {
-                        return true; // These two tiles can be merged
-                      }
+                            if (other && self.findTile(cell).value === self.findTile({x:x, y:y})) {
+                                return true; // These two tiles can be merged
+                            }
+                        }
                     }
-                  }
                 }
-              }
+            }
 
-              return false;
-            };*/
-
+            return false;
         },
 
         withinBounds: function(position) {
