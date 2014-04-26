@@ -2,16 +2,12 @@
 
     'use strict';
 
-    var STORAGE_KEY = 'game2048';
-
     exports.gameStorage = {
-        fetch: function () {
-        	console.log('fetch');
-
-            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        fetch: function (STORAGE_KEY) {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '0');
         },
-        save: function (tiles) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(tiles));
+        save: function (STORAGE_KEY, data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
     };
 

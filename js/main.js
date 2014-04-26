@@ -1,14 +1,16 @@
 var Game = new Vue({
-    el: '#tile-container',
+    el: '#mainVue',
     data: {
         size: 4,
         startTiles: 2,
         tiles: [],
-        grid: []
+        grid: [],
+        score: 0,
+        bestScore: gameStorage.fetch('bestScore')
     },
 
     created: function() {
-        this.initArrayGrid(this.size);
+        // this.initArrayGrid(this.size);
     },
 
     attached: function() {
@@ -16,19 +18,20 @@ var Game = new Vue({
     },
 
     ready: function() {
-        var data = gameStorage.fetch();
+        var data = gameStorage.fetch('vue2048');
 
-        if (data.length === 0) {
+        if (data === 0) {
             this.init();
         } else {
             this.continueGame(data);
         }
 
         this.$watch('tiles', function(tiles) {
-            gameStorage.save(tiles);
+            gameStorage.save('vue2048', tiles);
         });
-    },
 
+    },
+    //Can go to templates
     computed: {
         remaining: function() {
             return this.tiles.length;
@@ -49,19 +52,29 @@ var Game = new Vue({
         init: function() {
             var startTiles = this.startTiles;
 
+            this.initArrayGrid(this.size);
+            this.tiles = [];
+            this.updateScore(0);
+
             for (var i = 0; i < startTiles; i++) {
                 this.addRandomTile();
             }
         },
 
         continueGame: function(data) {
-            var arr = this.grid;
+            this.initArrayGrid(this.size);
 
+            var arr = this.grid;
             this.tiles = data;
+            this.score = gameStorage.fetch('score');
 
             data.forEach(function(item) {
                 arr[item.x][item.y] = 1;
             })
+        },
+
+        gameOver: function() {
+            console.log('gameOver');
         },
 
         initArrayGrid: function(size) {
@@ -209,9 +222,10 @@ var Game = new Vue({
             }
 
             this.grid[curr.x][curr.y] = 0;
-
             this.tiles.$remove(parseInt(key));
 
+            // Update the score
+            this.updateScore(next.value);
         },
 
         move: function(direction) {
@@ -245,13 +259,7 @@ var Game = new Vue({
                         // Only one merger per row traversal?
                         if (next && next.value === tile.value) {
 
-                            self.mergeTiles(tile, next, positions.next)
-
-                            // // Update the score
-                            // self.score += merged.value;
-
-                            // The mighty 2048 tile
-                            //if (merged.value === 2048) self.won = true;
+                            self.mergeTiles(tile, next, positions.next);
 
 
                         } else {
@@ -267,20 +275,19 @@ var Game = new Vue({
                 this.addRandomTile();
 
                 if (!this.movesAvailable()) {
-                    this.over = true; // Game over!
+                    this.gameOver();
                 }
 
-                //this.actuate();
             }
 
         },
 
         movesAvailable: function() {
-            return this.tileMatchesAvailable();
+            return this.availableCells().length > 0 || this.tileMatchesAvailable();
         },
 
         tileMatchesAvailable: function() {
-            var self = this;
+
             var size = self.size;
             var grid = self.grid;
             var tiles = self.tiles;
@@ -296,11 +303,16 @@ var Game = new Vue({
                             var cell = {
                                 x: x + vector.x,
                                 y: y + vector.y
-                            };
+                            },
+                                other;
 
-                            var other = self.grid[cell.x][cell.y];
+                            if (cell.x >= 0 && cell.x < size && cell.y >= 0 && cell.y < size)
+                                other = grid[cell.x][cell.y];
 
-                            if (other && self.findTile(cell).value === self.findTile({x:x, y:y})) {
+                            if (other && self.findTile(cell).value === self.findTile({
+                                x: x,
+                                y: y
+                            })) {
                                 return true; // These two tiles can be merged
                             }
                         }
@@ -334,10 +346,46 @@ var Game = new Vue({
             if (vector.y === 1) traversals.y = traversals.y.reverse();
 
             return traversals;
+        },
+
+        updateScore: function(score) {
+            var scoreContainer = document.getElementsByClassName('score-container')[0];
+
+            //On init
+            if (score === 0) {
+                this.score = 0;
+                gameStorage.save('score', 0);
+
+                return false;
+            }
+
+            this.score += score;
+            gameStorage.save('score', this.score);
+
+            if(this.score > this.bestScore) {
+                this.bestScore = this.score;
+                gameStorage.save('bestScore', this.bestScore);
+            }
+
+            // The mighty 2048 tile
+            if (score === 2048) alert('won');
+    
+            var addition = document.createElement("div");
+            addition.classList.add("score-addition");
+            addition.textContent = "+" + score;
+            scoreContainer.appendChild(addition);
+
+        },
+
+        clearContainer: function(container) {
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
         }
 
     }
 });
+
 
 
 var Keys = new KeyboardInputManager();
@@ -346,3 +394,7 @@ var Keys = new KeyboardInputManager();
 Keys.on('move', function(direction) {
     Game.move(direction);
 });
+
+// Keys.on('restart', function() {
+//     Game.init();
+// });

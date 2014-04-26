@@ -8,18 +8,18 @@
 </head>
 <body>
 
-	<div class="container">
+	<div class="container" id="mainVue">
 	    <div class="heading">
 	      <h1 class="title">2048</h1>
 	      <div class="scores-container">
-	        <div class="score-container">0</div>
-	        <div class="best-container">0</div>
+	        <div class="score-container">{{score}}</div>
+	        <div class="best-container">{{bestScore}}</div>
 	      </div>
 	    </div>
 
 	    <div class="above-game">
 	      <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
-	      <a class="restart-button">New Game</a>
+	      <a class="restart-button" v-on="click: init">New Game</a>
 	    </div>
 
 	    <div class="game-container">
@@ -58,7 +58,7 @@
 	        </div>
 	      </div>
 		  <!-- <div> -->
-	      <div class="tile-container" id="tile-container"> 
+	      <div class="tile-container" id="tile-container">
 				<div v-repeat="tiles" class="tile tile-{{value}} tile-position-{{x+1}}-{{y+1}} tile-new">
 					<div class="tile-inner">{{value}}</div>
 				</div>
@@ -67,7 +67,7 @@
 	    </div>
 
 	  </div>
-	
+
 
 
 
