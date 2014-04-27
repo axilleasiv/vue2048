@@ -20,54 +20,53 @@
 	    <div class="above-game">
 	      <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
 	      <a class="restart-button" v-on="click: init">New Game</a>
+	      <label class='left' for="noTiles">Select the number of tiles</label>
+	      <select v-on="change: changesTilesSize">
+	      	<option value="4">4 tiles</option>
+	      	<option value="5">5 tiles</option>
+	      	<option value="6">6 tiles</option>
+	      </select>
 	    </div>
 
-	    <div class="game-container">
+	    <div class="game-container" style="width:{{findDimension}}px;height:{{findDimension}}px;">
 	      <div class="game-message">
 	        <p></p>
 	        <div class="lower">
-		        <a class="keep-playing-button">Keep going</a>
-	          <a class="retry-button">Try again</a>
+		        <a class="keep-playing-button" v-on="click: clearMessage">Keep going</a>
+	          <a class="retry-button" v-on="click: init">Try again</a>
 	        </div>
 	      </div>
 
-	      <div class="grid-container">
-	        <div class="grid-row">
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	        </div>
-	        <div class="grid-row">
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	        </div>
-	        <div class="grid-row">
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	        </div>
-	        <div class="grid-row">
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	          <div class="grid-cell"></div>
-	        </div>
+	      <div class="grid-container" v-component="grid">
+	      	 <!-- Grid Here -->
 	      </div>
-		  <!-- <div> -->
+
 	      <div class="tile-container" id="tile-container">
-				<div v-repeat="tiles" class="tile tile-{{value}} tile-position-{{x+1}}-{{y+1}} tile-new">
+
+				<!-- Component way with template inside component obj -->
+				<div v-repeat="tiles" v-component="tile"></div>
+
+				<!-- Component way with computed function -->
+				<!-- <div v-repeat="tiles" v-component="tile" style="{{calculateStyle}}" class="tile tile-{{value}} tile-position-{{x+1}}-{{y+1}} tile-new">
 					<div class="tile-inner">{{value}}</div>
-				</div>
+				</div> -->
+
+				<!-- Use of the directive v-style -->
+				<!-- <div v-repeat="tiles" v-style="$transform: 'scale(' + x + ')'" class="tile tile-{{value}} tile-new">
+					<div class="tile-inner">{{value}}</div>
+				</div> -->
+
 	      </div>
-	      <!-- </div> -->
+
 	    </div>
 
 	  </div>
 
+	<!--<script type="text/x-template" id="grid-template">
+	    <div v-repeat="grid" class="grid-row">
+	    	<div v-repeat="grid" class="grid-cell"></div>
+	    </div>
+	</script> -->
 
 
 

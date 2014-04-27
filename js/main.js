@@ -1,6 +1,8 @@
 var Game = new Vue({
     el: '#mainVue',
     data: {
+        tileDimension: 124,
+        tilePosition: 121,
         size: 4,
         startTiles: 2,
         tiles: [],
@@ -11,10 +13,7 @@ var Game = new Vue({
 
     created: function() {
         // this.initArrayGrid(this.size);
-    },
-
-    attached: function() {
-        console.log('Attached');
+        this.getWindowSize();
     },
 
     ready: function() {
@@ -27,15 +26,16 @@ var Game = new Vue({
         }
 
         this.$watch('tiles', function(tiles) {
-            gameStorage.save('vue2048', tiles);
+            //gameStorage.save('vue2048', tiles);
         });
 
     },
     //Can go to templates
     computed: {
-        remaining: function() {
-            return this.tiles.length;
+        findDimension: function() {
+            return this.grid.length * this.tileDimension;
         },
+
         allDone: {
             $get: function() {
                 return this.remaining === 0;
@@ -47,12 +47,47 @@ var Game = new Vue({
             }
         }
     },
+
+    components: {
+        grid: {
+            template:  '<div v-repeat="grid" class="grid-row">\
+                            <div v-repeat="grid" class="grid-cell"></div>\
+                        </div>',
+            replace: false
+        },
+
+        tile: {
+            //Better to use template, todo delete tile position
+            template: '<div style="{{calculateStyle}}" class="tile tile-{{value}} tile-position-{{x+1}}-{{y+1}} tile-new">\
+                        <div class="tile-inner">{{value}}</div>\
+                    </div>',
+
+            replace: true,
+
+            computed: {
+                calculateStyle: function() {
+                    var tilePosition = this.$parent.tilePosition;
+                    var x = this.x * tilePosition;
+                    var y = this.y * tilePosition;
+
+                    return '-webkit-transform: translate(' + x + 'px, ' + y + 'px);' +
+                        '-moz-transform: translate(0px, 0px);' +
+                        'transform: translate(0px, 0px);';
+                }
+            }
+        }
+    },
+
+
     methods: {
 
         init: function() {
+            // debugger;
             var startTiles = this.startTiles;
 
             this.initArrayGrid(this.size);
+            this.clearMessage();
+
             this.tiles = [];
             this.updateScore(0);
 
@@ -74,7 +109,7 @@ var Game = new Vue({
         },
 
         gameOver: function() {
-            console.log('gameOver');
+            this.message();
         },
 
         initArrayGrid: function(size) {
@@ -90,9 +125,13 @@ var Game = new Vue({
             this.grid = arr;
         },
 
-        addRandomTile: function() {
-            //debugger;
+        changesTilesSize: function(e) {
+            this.size = parseInt(e.target.value);
+            this.init();
+        },
 
+        addRandomTile: function() {
+    
             if (this.availableCells().length > 0) {
                 var value = Math.random() < 0.9 ? 2 : 4,
                     randomCell = this.randomAvailableCell();
@@ -104,9 +143,11 @@ var Game = new Vue({
                     value: value
                 });
 
+
                 this.grid[randomCell.x][randomCell.y] = 1;
 
             }
+
         },
 
         // Find the first available random position
@@ -163,8 +204,6 @@ var Game = new Vue({
         findFarthestPosition: function(cell, vector) {
             var previous;
 
-            //debugger;
-
             do {
                 previous = cell;
                 cell = {
@@ -185,8 +224,9 @@ var Game = new Vue({
             if (position.x === -1 || position.y === -1)
                 return null;
             else {
+                var tiles = this.tiles;
 
-                return this.tiles.filter(function(item, index) {
+                return tiles.filter(function(item, index) {
                     return item.x === position.x && item.y === position.y;
                 })[0];
             }
@@ -229,7 +269,7 @@ var Game = new Vue({
         },
 
         move: function(direction) {
-            // debugger;
+
             var vector = this.getVector(direction);
             var traversals = this.buildTraversals(vector);
             var moved = false;
@@ -274,23 +314,22 @@ var Game = new Vue({
             if (moved) {
                 this.addRandomTile();
 
-                if (!this.movesAvailable()) {
-                    this.gameOver();
+                if(grid.toString().indexOf('0') === -1){
+                    if(!this.tileMatchesAvailable()){
+                        this.gameOver();
+                    }
+
                 }
 
             }
 
         },
 
-        movesAvailable: function() {
-            return this.availableCells().length > 0 || this.tileMatchesAvailable();
-        },
-
         tileMatchesAvailable: function() {
 
-            var size = self.size;
-            var grid = self.grid;
-            var tiles = self.tiles;
+            var size = this.size;
+            var grid = this.grid;
+            var tiles = this.tiles;
             var tile;
 
             for (var x = 0; x < size; x++) {
@@ -299,20 +338,23 @@ var Game = new Vue({
 
                     if (tile) {
                         for (var direction = 0; direction < 4; direction++) {
-                            var vector = self.getVector(direction);
+                            var vector = this.getVector(direction);
                             var cell = {
                                 x: x + vector.x,
                                 y: y + vector.y
                             },
                                 other;
 
-                            if (cell.x >= 0 && cell.x < size && cell.y >= 0 && cell.y < size)
+                            if (cell.x >= 0 && cell.x < size && cell.y >= 0 && cell.y < size){
                                 other = grid[cell.x][cell.y];
+                            } else {
+                                continue;
+                            }
 
-                            if (other && self.findTile(cell).value === self.findTile({
+                            if (other && this.findTile(cell).value === this.findTile({
                                 x: x,
                                 y: y
-                            })) {
+                            }).value) {
                                 return true; // These two tiles can be merged
                             }
                         }
@@ -368,8 +410,9 @@ var Game = new Vue({
             }
 
             // The mighty 2048 tile
-            if (score === 2048) alert('won');
-    
+            if (score === 2048)
+                this.message(true);
+
             var addition = document.createElement("div");
             addition.classList.add("score-addition");
             addition.textContent = "+" + score;
@@ -377,9 +420,43 @@ var Game = new Vue({
 
         },
 
+        message: function(won) {
+            var type = won ? "game-won" : "game-over";
+            var message = won ? "You win!" : "Game over!";
+            var messageContainer = document.querySelector(".game-message");
+
+            messageContainer.classList.add(type);
+            messageContainer.getElementsByTagName("p")[0].textContent = message;
+        },
+
+        clearMessage: function() {
+            messageContainer = document.querySelector(".game-message");
+
+            messageContainer.classList.remove("game-won");
+            messageContainer.classList.remove("game-over");
+        },
+
         clearContainer: function(container) {
             while (container.firstChild) {
                 container.removeChild(container.firstChild);
+            }
+        },
+
+        getWindowSize: function() {
+            var w = window,
+                d = document,
+                e = d.documentElement,
+                g = d.getElementsByTagName('body')[0],
+                x = w.innerWidth || e.clientWidth || g.clientWidth,
+                y = w.innerHeight || e.clientHeight || g.clientHeight;
+
+            if (x < 520) {
+                this.tileDimension = 69.5;
+                this.tilePosition = 67;
+            } else {
+                this.tileDimension = 124;
+                this.tilePosition = 121;
+
             }
         }
 
@@ -395,6 +472,41 @@ Keys.on('move', function(direction) {
     Game.move(direction);
 });
 
+
+window.onresize = function(event) {
+    Game.getWindowSize();
+};
+
 // Keys.on('restart', function() {
 //     Game.init();
+// });
+
+
+// Vue.directive('for', {
+//     bind: function () {
+//         // this.el.style.color = '#fff';
+//         // this.el.style.backgroundColor = this.arg;
+//         console.log(this);
+//     },
+//     update: function (value) {
+//         // this.el.innerHTML =
+//         //     'argument - ' + this.arg + '<br>' +
+//         //     'key - ' + this.key + '<br>' +
+//         //     'value - ' + value
+//     }
+// });
+
+// Vue.component('grid', {
+//     template: '#grid-template',
+//     replace: false,
+//     created: function() {
+//         console.log('componed created');
+//     },
+
+//     ready: function() {
+//         console.log('component ready');
+//     },
+//     methods: {
+
+//     }
 // });
