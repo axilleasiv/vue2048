@@ -26,7 +26,7 @@ var Game = new Vue({
         }
 
         this.$watch('tiles', function(tiles) {
-            //gameStorage.save('vue2048', tiles);
+            gameStorage.save('vue2048', tiles);
         });
 
     },
