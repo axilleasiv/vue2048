@@ -42,38 +42,17 @@
 	      </div>
 
 	      <div class="tile-container" id="tile-container">
-
-				<!-- Component way with template inside component obj -->
 				<div v-repeat="tiles" v-component="tile"></div>
-
-				<!-- Component way with computed function -->
-				<!-- <div v-repeat="tiles" v-component="tile" style="{{calculateStyle}}" class="tile tile-{{value}} tile-position-{{x+1}}-{{y+1}} tile-new">
-					<div class="tile-inner">{{value}}</div>
-				</div> -->
-
-				<!-- Use of the directive v-style -->
-				<!-- <div v-repeat="tiles" v-style="$transform: 'scale(' + x + ')'" class="tile tile-{{value}} tile-new">
-					<div class="tile-inner">{{value}}</div>
-				</div> -->
-
 	      </div>
 
 	    </div>
 
 	  </div>
 
-	<!--<script type="text/x-template" id="grid-template">
-	    <div v-repeat="grid" class="grid-row">
-	    	<div v-repeat="grid" class="grid-cell"></div>
-	    </div>
-	</script> -->
-
-
 
 	<script src="js/libs/vue.js"></script>
 	<script src="js/keys.js"></script>
 	<script src="js/store.js"></script>
 	<script src="js/main.js"></script>
-	<script src="//localhost:35729/livereload.js"></script>
 </body>
 </html>
