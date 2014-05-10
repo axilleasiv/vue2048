@@ -3,23 +3,24 @@ var Game = new Vue({
     data: {
         tileDimension: 124,
         tilePosition: 121,
-        size: 4,
         startTiles: 2,
         tiles: [],
         grid: [],
-        score: 0,
-        bestScore: gameStorage.fetch('bestScore')
+        conf: {
+            score: 0,
+            size: 5,
+            bestScore: gameStorage.fetch('vue2048-config').bestScore || 0
+        }
     },
 
     created: function() {
-        // this.initArrayGrid(this.size);
         this.getWindowSize();
     },
 
     ready: function() {
         var data = gameStorage.fetch('vue2048');
 
-        if (data === 0) {
+        if (data.length === 0) {
             this.init();
         } else {
             this.continueGame(data);
@@ -29,12 +30,22 @@ var Game = new Vue({
             gameStorage.save('vue2048', tiles);
         });
 
+        this.$watch('conf', function(conf) {
+            gameStorage.save('vue2048-config', conf);
+        });
+
     },
     //Can go to templates
     computed: {
         findDimension: function() {
             return this.grid.length * this.tileDimension;
         },
+
+        // selected: function(el){
+        //     debugger;
+
+        //    return 'selected';
+        // },
 
         allDone: {
             $get: function() {
@@ -71,8 +82,8 @@ var Game = new Vue({
                     var y = this.y * tilePosition;
 
                     return '-webkit-transform: translate(' + x + 'px, ' + y + 'px);' +
-                        '-moz-transform: translate(0px, 0px);' +
-                        'transform: translate(0px, 0px);';
+                        '-moz-transform: translate(' + x + 'px, ' + y + 'px);' +
+                        'transform: translate(' + x + 'px, ' + y + 'px);';
                 }
             }
         }
@@ -82,10 +93,10 @@ var Game = new Vue({
     methods: {
 
         init: function() {
-            // debugger;
+        
             var startTiles = this.startTiles;
 
-            this.initArrayGrid(this.size);
+            this.initArrayGrid(this.conf.size);
             this.clearMessage();
 
             this.tiles = [];
@@ -97,15 +108,17 @@ var Game = new Vue({
         },
 
         continueGame: function(data) {
-            this.initArrayGrid(this.size);
+            var arr,
+                conf;
 
-            var arr = this.grid;
+            this.conf = conf =  gameStorage.fetch('vue2048-config');    
+            this.initArrayGrid(conf.size);
+            arr = this.grid;
             this.tiles = data;
-            this.score = gameStorage.fetch('score');
 
             data.forEach(function(item) {
                 arr[item.x][item.y] = 1;
-            })
+            });
         },
 
         gameOver: function() {
@@ -126,7 +139,8 @@ var Game = new Vue({
         },
 
         changesTilesSize: function(e) {
-            this.size = parseInt(e.target.value);
+            this.conf.size = parseInt(e.target.value);
+            
             this.init();
         },
 
@@ -161,7 +175,7 @@ var Game = new Vue({
 
         availableCells: function() {
             var cells = [],
-                size = this.size,
+                size = this.conf.size,
                 grid = this.grid;
 
             for (var x = 0; x < size; x++) {
@@ -327,7 +341,7 @@ var Game = new Vue({
 
         tileMatchesAvailable: function() {
 
-            var size = this.size;
+            var size = this.conf.size;
             var grid = this.grid;
             var tiles = this.tiles;
             var tile;
@@ -366,7 +380,7 @@ var Game = new Vue({
         },
 
         withinBounds: function(position) {
-            var size = this.size;
+            var size = this.conf.size;
 
             return position.x >= 0 && position.x < size && position.y >= 0 && position.y < size;
         },
@@ -376,7 +390,7 @@ var Game = new Vue({
                 x: [],
                 y: []
             },
-                size = this.size;
+                size = this.conf.size;
 
             for (var pos = 0; pos < size; pos++) {
                 traversals.x.push(pos);
@@ -395,18 +409,19 @@ var Game = new Vue({
 
             //On init
             if (score === 0) {
-                this.score = 0;
-                gameStorage.save('score', 0);
+                this.conf.score = 0;
+                //gameStorage.save('score', 0);
 
                 return false;
             }
+           
 
-            this.score += score;
-            gameStorage.save('score', this.score);
+            this.conf.score += score;
+            //gameStorage.save('score', this.score);
 
-            if(this.score > this.bestScore) {
-                this.bestScore = this.score;
-                gameStorage.save('bestScore', this.bestScore);
+            if(this.conf.score > this.conf.bestScore) {
+                this.conf.bestScore = this.conf.score;
+                //gameStorage.save('bestScore', this.bestScore);
             }
 
             // The mighty 2048 tile

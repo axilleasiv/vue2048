@@ -12,8 +12,8 @@
 	    <div class="heading">
 	      <h1 class="title">2048</h1>
 	      <div class="scores-container">
-	        <div class="score-container">{{score}}</div>
-	        <div class="best-container">{{bestScore}}</div>
+	        <div class="score-container">{{conf.score}}</div>
+	        <div class="best-container">{{conf.bestScore}}</div>
 	      </div>
 	    </div>
 
@@ -22,9 +22,9 @@
 	      <a class="restart-button" v-on="click: init">New Game</a>
 	      <label class='left' for="noTiles">Select the number of tiles</label>
 	      <select v-on="change: changesTilesSize">
-	      	<option value="4">4 tiles</option>
-	      	<option value="5">5 tiles</option>
-	      	<option value="6">6 tiles</option>
+	      	<option value="4" v-attr="selected:conf.size === 4 ? 'selected' : false">4 tiles</option>
+	      	<option value="5" v-attr="selected:conf.size === 5 ? 'selected' : false">5 tiles</option>
+	      	<option value="6" v-attr="selected:conf.size === 6 ? 'selected' : false">6 tiles</option>
 	      </select>
 	    </div>
 
