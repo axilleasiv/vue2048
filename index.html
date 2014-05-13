@@ -12,8 +12,8 @@
 	    <div class="heading">
 	      <h1 class="title">2048</h1>
 	      <div class="scores-container">
-	        <div class="score-container">{{score}}</div>
-	        <div class="best-container">{{bestScore}}</div>
+	        <div class="score-container">{{conf.score}}</div>
+	        <div class="best-container">{{conf.bestScore}}</div>
 	      </div>
 	    </div>
 
@@ -22,9 +22,9 @@
 	      <a class="restart-button" v-on="click: init">New Game</a>
 	      <label class='left' for="noTiles">Select the number of tiles</label>
 	      <select v-on="change: changesTilesSize">
-	      	<option value="4">4 tiles</option>
-	      	<option value="5">5 tiles</option>
-	      	<option value="6">6 tiles</option>
+	      	<option value="4" v-attr="selected:conf.size === 4 ? 'selected' : false">4 tiles</option>
+	      	<option value="5" v-attr="selected:conf.size === 5 ? 'selected' : false">5 tiles</option>
+	      	<option value="6" v-attr="selected:conf.size === 6 ? 'selected' : false">6 tiles</option>
 	      </select>
 	    </div>
 
@@ -46,11 +46,25 @@
 	      </div>
 
 	    </div>
+	    <p class="game-explanation">
+	    <strong class="important">How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>
+	  </p>
+	  <hr>
+
+	  <p>
+	    <strong class="important">NOTE:</strong> This game was written using Vue.js
+	  </p>
+
+	  <hr>
+
+	  <p>
+	    Created by <a href="https://github.com/axilleasiv">Achilleas Kiritsakas</a> based on 2048 by <a href="http://gabrielecirulli.com" target="_blank">Gabriele Cirulli.</a> Based on <a href="https://itunes.apple.com/us/app/1024!/id823499224" target="_blank">1024 by Veewo Studio</a> and conceptually similar to <a href="http://asherv.com/threes/" target="_blank">Threes by Asher Vollmer.</a>
+	  </p>
 
 	  </div>
 
 
-	<script src="js/libs/vue.js"></script>
+	<script src="js/libs/vue.min.js"></script>
 	<script src="js/keys.js"></script>
 	<script src="js/store.js"></script>
 	<script src="js/main.js"></script>
