@@ -10,7 +10,7 @@
             grid: [],
             conf: {
                 score: 0,
-                size: 5,
+                size: 4,
                 bestScore: gameStorage.fetch('vue2048-config').bestScore || 0
             }
         },
