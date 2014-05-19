@@ -8,7 +8,7 @@
 </head>
 <body>
 
-	<div class="container" id="mainVue">
+	<div class="container" id="mainVue" v-cloak>
 	    <div class="heading">
 	      <h1 class="title">2048</h1>
 	      <div class="scores-container">
@@ -21,14 +21,15 @@
 	      <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
 	      <a class="restart-button" v-on="click: init">New Game</a>
 	      <label class='left' for="noTiles">Select the number of tiles</label>
-	      <select v-on="change: changesTilesSize">
-	      	<option value="4" v-attr="selected:conf.size === 4 ? 'selected' : false">4 tiles</option>
-	      	<option value="5" v-attr="selected:conf.size === 5 ? 'selected' : false">5 tiles</option>
-	      	<option value="6" v-attr="selected:conf.size === 6 ? 'selected' : false">6 tiles</option>
+	    
+	      <select v-on="change: changesTilesSize" v-selected="conf.size">
+	      	<option value="4">4 tiles</option>
+	      	<option value="5">5 tiles</option>
+	      	<option value="6">6 tiles</option>
 	      </select>
 	    </div>
 
-	    <div class="game-container" style="width:{{findDimension}}px;height:{{findDimension}}px;">
+	    <div class="game-container" v-style="width:findDimension + 'px', height: findDimension + 'px'">
 	      <div class="game-message">
 	        <p></p>
 	        <div class="lower">
@@ -37,19 +38,23 @@
 	        </div>
 	      </div>
 
-	      <div class="grid-container" v-component="grid">
+	      <div class="grid-container">
 	      	 <!-- Grid Here -->
+	      		<div v-repeat="grid" class="grid-row">
+					<div v-repeat="grid" class="grid-cell"></div>
+					<!-- <div v-repeat="grid" class="grid-cell" v-style="width: cellW + 'px',height: cellW + 'px'"></div> -->
+				</div>
 	      </div>
 
 	      <div class="tile-container" id="tile-container">
 
 				<!-- Component way with template inside component obj -->
-				<div v-repeat="tiles" v-component="tile"></div>
+				<!-- <div v-repeat="tiles" v-component="tile"></div> -->
 
 				<!-- Component way with computed function -->
-				<!-- <div v-repeat="tiles" v-component="tile" style="{{calculateStyle}}" class="tile tile-{{value}} tile-position-{{x+1}}-{{y+1}} tile-new">
+				<div v-repeat="tiles" v-component="tile"  v-style="$transform: 'translate(' + calcStyleX + 'px,' + calcStyleY + 'px)'" class="tile tile-{{value}} tile-new{{merged ? ' tile-merged' : ''}}">
 					<div class="tile-inner">{{value}}</div>
-				</div> -->
+				</div>
 
 				<!-- Use of the directive v-style -->
 				<!-- <div v-repeat="tiles" v-style="$transform: 'scale(' + x + ')'" class="tile tile-{{value}} tile-new">
